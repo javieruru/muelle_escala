@@ -25,7 +25,8 @@ input,select,textarea{font:inherit;color:inherit}
   --text3:var(--text-3);
   --accent2:var(--accent-2);
   /* Schedule vars */
-  --hh:56px;
+  --hh:56px;  /* topbar del muelle */
+  --hh-schedule:66px; /* header original del schedule — usado para cálculos del timeline */
   --ch:42px;
   --tw:268px;
   --ew:76px;
@@ -607,7 +608,7 @@ body.page-schedule[data-theme="schematic"] .mv{background:#dcdcd8}
 /* Zona pasada — rayas sutiles */
 .ap{background:color-mix(in oklab, var(--panel) 80%, transparent);opacity:.7}
 
-.sched-app{display:flex;height:calc(100vh - 56px - 28px);overflow:hidden}
+.sched-app{display:flex;height:calc(100vh - 66px);overflow:hidden;margin-top:10px}
 
 /* Tabla lateral */
 .pt{width:var(--tw);flex-shrink:0;display:flex;flex-direction:column;background:var(--panel);transition:width .22s ease;overflow:hidden;border-right:1px solid var(--border)}

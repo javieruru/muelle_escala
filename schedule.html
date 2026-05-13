@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body class="page-schedule" data-theme="console" data-density="cozy">
-<div class="app-shell" style="grid-template-rows:56px 1fr 28px">
+<div class="app-shell" style="grid-template-rows:56px 1fr">
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark">DS</div>
@@ -48,7 +48,7 @@
     </div>
   </header>
 
-  <!-- Schedule main -->
+  <!-- Schedule main — ocupa todo el espacio bajo el topbar -->
   <div class="sched-app">
 <!-- TABLA -->
   <div class="pt" id="panelTabla">
@@ -193,10 +193,7 @@
 </div>
   </div><!-- end sched-app -->
 
-  <footer class="statusbar">
-    <div class="statusbar-l"><span id="statusSchedule">Sin datos · Cargá un Excel para comenzar</span></div>
-    <div class="statusbar-r"><span>Al cargar el Excel se sincroniza automáticamente con el muelle</span></div>
-  </footer>
+
 </div><!-- end app-shell -->
 
 <!-- Tweaks panel igual que el muelle -->
