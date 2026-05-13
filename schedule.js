@@ -987,14 +987,26 @@ setInterval(()=>{ actuFecha(); $('nowt') && ($('.nowt').textContent=`NOW · ${fH
 
 /* ─── SINCRONIZACIÓN FIREBASE ─── */
 async function sincronizarConFirebase(){
-  const fs = window.FirebaseSesiones;
-  if(!fs){ console.warn('Firebase no disponible aún'); return; }
+  // Esperar a que el módulo Firebase esté disponible
+  let intentos=0;
+  await new Promise(resolve=>{
+    const esperar=setInterval(()=>{
+      intentos++;
+      if(window.FirebaseSesiones||intentos>30){
+        clearInterval(esperar);
+        resolve();
+      }
+    },200);
+  });
+  const fs=window.FirebaseSesiones;
+  if(!fs){ console.warn('Firebase no disponible'); return; }
   try{
     const data = {
       tipo: 'schedule',
       fecha: new Date().toISOString(),
       fechaStr: new Date().toLocaleDateString('es-UY') + ' ' + new Date().toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'}),
       semana,
+      mPos,
       buques: buques.map(b=>({
         nombre: b.nombre,
         tipo: b.tipo,
@@ -1005,12 +1017,14 @@ async function sincronizarConFirebase(){
         moves: b.moves||0,
         metros: b.metros||0,
         notas: b.notas||'',
-        color: b.color||'#888'
+        color: b.color||'#888',
+        locked: b.locked||false,
       }))
     };
     await fs.guardarSchedule(data);
     toast('☁️ Schedule sincronizado');
   } catch(e){
     console.warn('Error sincronizando schedule:', e);
+    toast('⚠ Error al sincronizar');
   }
 }
