@@ -151,6 +151,9 @@ function mostrarInfoBuque(obj, e){
   }).join('<br>');
   const proaLabel=obj.orientacion==='babor'?'← Proa':'Proa →';
   const popaLabel=obj.orientacion==='babor'?'Popa →':'← Popa';
+  const etbRow=obj.etb?`<div class="pif-row"><span class="pif-label">ETB</span><span class="pif-value highlight">${obj.etb}</span></div>`:'';
+  const etsRow=obj.ets?`<div class="pif-row"><span class="pif-label">ETS</span><span class="pif-value">${obj.ets}</span></div>`:'';
+  const schedDivider=(obj.etb||obj.ets)?'<div class="pif-divider"></div>':'';
   pifBody.innerHTML=`
     <div class="pif-row"><span class="pif-label">Eslora</span><span class="pif-value">${obj.metros} m</span></div>
     <div class="pif-row"><span class="pif-label">Manga</span><span class="pif-value">${obj.manga} m</span></div>
@@ -159,6 +162,7 @@ function mostrarInfoBuque(obj, e){
     <div class="pif-row"><span class="pif-label">Orientación</span><span class="pif-value" style="font-size:10px">${proaLabel} &nbsp;·&nbsp; ${popaLabel}</span></div>
     <div class="pif-row"><span class="pif-label">Bitas</span><span class="pif-value highlight">${obj.bitaDesde} → ${obj.bitaHasta}</span></div>
     <div class="pif-row"><span class="pif-label">Estado</span><span class="pif-value ${obj.locked?'warn':''}">${obj.locked?'🔒 Bloqueado':'🔓 Libre'}</span></div>
+    ${schedDivider}${etbRow}${etsRow}
     ${obj.notas?`<div class="pif-divider"></div><div class="pif-row"><span class="pif-label">Nota</span><span class="pif-value" style="font-size:10px;line-height:1.5;white-space:normal">${obj.notas}</span></div>`:''}
     <div class="pif-divider"></div>
     <div class="pif-row"><span class="pif-label">Cabos</span><span class="pif-value" style="font-size:10px;line-height:1.6">${cabosStr}</span></div>
@@ -604,14 +608,23 @@ function actualizarTabla(){
 ============================================================ */
 function actualizarSidePanel(){
   const list=document.getElementById('shipList'); if(!list) return;
-  // Filtro
   const filtro=(document.getElementById('searchInput')?.value||'').toLowerCase();
-  const visible=filtro?buques.filter(b=>b.nombre.toLowerCase().includes(filtro)||b.orientacion.toLowerCase().includes(filtro)||b.bitaDesde.toString().includes(filtro)||b.bitaHasta.toString().includes(filtro)):buques;
+
+  // Ordenar por ETB — con ETB primero (más próximo), luego sin ETB
+  const sorted=[...buques].sort((a,b)=>{
+    if(a.etb&&b.etb) return new Date(a.etb)-new Date(b.etb);
+    if(a.etb) return -1;
+    if(b.etb) return 1;
+    return 0;
+  });
+
+  const visible=filtro?sorted.filter(b=>b.nombre.toLowerCase().includes(filtro)||b.orientacion.toLowerCase().includes(filtro)||b.bitaDesde.toString().includes(filtro)||b.bitaHasta.toString().includes(filtro)):sorted;
   list.innerHTML='';
   visible.forEach(s=>{
     const row=document.createElement('div');
     row.className='ship-row';
     row.style.setProperty('--ship-color',s.color);
+    const etbStr=s.etb?`<span style="color:var(--accent);font-weight:700">${s.etb}</span>`:'';
     row.innerHTML=`
       <div class="ship-row-color"></div>
       <div class="ship-row-info">
@@ -620,7 +633,7 @@ function actualizarSidePanel(){
           <span><b>${s.metros}</b>m</span>
           <span><b>${s.manga}</b>m</span>
           <span><b>${s.moves||0}</b> mv</span>
-          <span>· ${cabos.filter(c=>c.buqueId===s.id).length} cabos</span>
+          ${etbStr?`<span>· ETB ${etbStr}</span>`:`<span style="color:var(--text-3)">· ${cabos.filter(c=>c.buqueId===s.id).length} cabos</span>`}
         </div>
       </div>
       <div class="ship-row-tag ${s.orientacion}">${s.orientacion==='estribor'?'EST':'BAB'}</div>`;
