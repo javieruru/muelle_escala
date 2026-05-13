@@ -956,6 +956,34 @@ window.addEventListener('resize',()=>render());
 render();
 setInterval(()=>{ actuFecha(); $('nowt') && ($('.nowt').textContent=`NOW · ${fH(new Date())}`); },60000);
 
+// Restaurar desde Firestore al cargar la página
+(async function restaurarDesdeFirestore(){
+  // Esperar a que Firebase esté disponible
+  let intentos=0;
+  const esperar=setInterval(async()=>{
+    intentos++;
+    if(window.FirebaseSesiones||intentos>20){
+      clearInterval(esperar);
+      if(!window.FirebaseSesiones) return;
+      try{
+        const data=await window.FirebaseSesiones.obtenerSchedule();
+        if(!data||!data.buques||!data.buques.length) return;
+        buques=data.buques.map(b=>({
+          ...b,
+          eta:b.eta?new Date(b.eta):null,
+          etb:b.etb?new Date(b.etb):null,
+          ets:b.ets?new Date(b.ets):null,
+          locked:b.locked!==undefined?b.locked:true,
+        }));
+        if(data.semana) semana=data.semana;
+        if(data.mPos) mPos=data.mPos;
+        toast('☁️ Schedule restaurado desde la nube');
+        render();
+      }catch(e){ console.warn('Error restaurando schedule:',e); }
+    }
+  },300);
+})();
+
 
 /* ─── SINCRONIZACIÓN FIREBASE ─── */
 async function sincronizarConFirebase(){

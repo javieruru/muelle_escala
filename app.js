@@ -308,9 +308,67 @@ function agregarBuque(nombre,metros,manga,color,orientacion,moves,notas){
   return true;
 }
 
-/* ============================================================
-   PERSISTENCIA
-============================================================ */
+/* ─── BUQUES DEL SCHEDULE (panel derecho, no van al muelle automáticamente) ─── */
+let buquesSchedule = [];
+
+function cargarBuquesDesdeSchedule(data){
+  buquesSchedule = data.map(b=>({
+    nombre: b.nombre,
+    metros: b.metros||0,
+    manga: 35, // default hasta que venga del schedule
+    moves: b.moves||0,
+    color: b.color||'#888',
+    etb: b.etb ? new Date(b.etb).toLocaleDateString('es-UY',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : null,
+    ets: b.ets ? new Date(b.ets).toLocaleDateString('es-UY',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : null,
+    tipo: b.tipo||'',
+    service: b.service||'',
+    notas: b.notas||'',
+    fromSchedule: true,
+  }));
+  actualizarPanelSchedule();
+}
+
+function actualizarPanelSchedule(){
+  const list=document.getElementById('shipList'); if(!list) return;
+  // Solo mostrar si no hay búsqueda activa
+  const filtro=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  // Ordenar por ETB
+  const sorted=[...buquesSchedule].sort((a,b)=>{
+    if(a.etb&&b.etb) return a.etb.localeCompare(b.etb);
+    if(a.etb) return -1;
+    if(b.etb) return 1;
+    return 0;
+  });
+  const visible=filtro?sorted.filter(b=>b.nombre.toLowerCase().includes(filtro)):sorted;
+
+  // Si hay buques en muelle, agregar separador
+  if(buques.length>0){
+    const sep=document.createElement('div');
+    sep.style.cssText='padding:6px 14px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid var(--border);border-top:1px solid var(--border);background:var(--panel-2)';
+    sep.textContent='☁ Del schedule';
+    list.appendChild(sep);
+  }
+
+  visible.forEach(s=>{
+    const row=document.createElement('div');
+    row.className='ship-row';
+    row.style.setProperty('--ship-color',s.color);
+    row.style.opacity='.8';
+    const etbStr=s.etb?`<span style="color:var(--accent);font-weight:700">${s.etb}</span>`:'';
+    row.innerHTML=`
+      <div class="ship-row-color" style="background:repeating-linear-gradient(45deg,${s.color} 0,${s.color} 3px,transparent 3px,transparent 6px)"></div>
+      <div class="ship-row-info">
+        <div class="ship-row-name">${s.nombre}</div>
+        <div class="ship-row-meta">
+          <span><b>${s.metros}</b>m</span>
+          <span><b>${s.moves}</b> mv</span>
+          ${etbStr?`<span>· ETB ${etbStr}</span>`:''}
+        </div>
+      </div>
+      <div class="ship-row-tag" style="font-size:8px;opacity:.7">${s.tipo||'SCH'}</div>`;
+    list.appendChild(row);
+  });
+}
 function guardarEstado(){
   localStorage.setItem('docksim_buques',JSON.stringify(buques.map(b=>({id:b.id,nombre:b.nombre,metros:b.metros,manga:b.manga,color:b.color,orientacion:b.orientacion,moves:b.moves||0,locked:b.locked,leftM:b.leftM,notas:b.notas||''}))));
   localStorage.setItem('docksim_cabos',JSON.stringify(cabos.map(c=>({id:c.id,buqueId:c.buqueId,pctX:c.pctX,pctY:c.pctY,bitaNum:c.bitaNum}))));
@@ -665,6 +723,8 @@ function actualizarSidePanel(){
   if(sm) sm.textContent=`${totalM.toFixed(0)} / ${Math.round(MUELLE_METROS_TOTAL)} m`;
   if(scn) scn.textContent=nCabosTotal;
   if(scb) scb.textContent=`en ${bitasUsadas} bita${bitasUsadas!==1?'s':''}`;
+  // Agregar buques del schedule al panel
+  if(buquesSchedule.length>0) actualizarPanelSchedule();
 }
 
 // Delegación eventos tabla
@@ -1307,6 +1367,20 @@ window.addEventListener('load',()=>{
       if(obj) actualizarLineaCabo(c,obj);
     });
   });
+  // Cargar buques del schedule desde Firestore
+  let intentos=0;
+  const esperar=setInterval(async()=>{
+    intentos++;
+    if(window.FirebaseSesiones||intentos>20){
+      clearInterval(esperar);
+      if(!window.FirebaseSesiones) return;
+      try{
+        const data=await window.FirebaseSesiones.obtenerSchedule();
+        if(!data||!data.buques||!data.buques.length) return;
+        cargarBuquesDesdeSchedule(data.buques);
+      }catch(e){ console.warn('Error cargando schedule:',e); }
+    }
+  },300);
 });
 
 (function initTweaks(){
