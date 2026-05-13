@@ -572,23 +572,40 @@ body[data-theme="schematic"] .twk-slider{background:#e3e3e1}
 ========================================================== */
 body.page-schedule{background:var(--bg)}
 
-/* Schedule usa bg claro siempre */
-body.page-schedule[data-theme="console"]{
-  --bg:#cceeff;
-  --bg-2:#f0faff;
-  --panel:#f0faff;
-  --panel-2:#e0f4fc;
-  --border:#a8d8ea;
-  --border-strong:#70b8d4;
-  --text:#0f2d3a;
-  --text-2:#2a5566;
-  --text-3:#6a9aaa;
-  --accent:#0e9e6e;
-  --accent-2:#0bbf84;
-  --danger:#d93030;
-  --warn:#d07010;
-  --shadow:0 4px 20px rgba(0,80,120,.13);
+/* Schedule usa EXACTAMENTE los mismos temas que el muelle */
+/* Alias de variables viejas del schedule → nuevas de DockSim */
+body.page-schedule{
+  --fm: var(--font-ui);
+  --fmono: var(--font-mono);
+  --ac: var(--accent);
+  --ac2: var(--accent-2);
+  --dg: var(--danger);
+  --wn: var(--warn);
+  --bd: var(--border);
+  --bd2: var(--border-strong);
+  --tx: var(--text);
+  --tx2: var(--text-2);
+  --tx3: var(--text-3);
+  --bg2: var(--panel);
+  --sh: var(--shadow);
+  --shl: var(--shadow);
+  --rsm: var(--radius-sm);
+  --rmd: var(--radius-md);
+  --rlg: var(--radius-lg);
 }
+
+/* Colores del muelle en el schedule */
+body.page-schedule[data-theme="console"] .mn{background:#1a2a36}
+body.page-schedule[data-theme="console"] .mv{background:#243846}
+body.page-schedule[data-theme="carta"] .mn{background:#e8d8ad}
+body.page-schedule[data-theme="carta"] .mv{background:#d5c089}
+body.page-schedule[data-theme="schematic"] .mn{background:#ededeb}
+body.page-schedule[data-theme="schematic"] .mv{background:#dcdcd8}
+
+/* Zona futura (agua) — usa water vars del tema */
+.af{background:linear-gradient(180deg,var(--water-1) 0%,var(--water-2) 100%)}
+/* Zona pasada — rayas sutiles */
+.ap{background:color-mix(in oklab, var(--panel) 80%, transparent);opacity:.7}
 
 .sched-app{display:flex;height:calc(100vh - 56px - 28px);overflow:hidden}
 

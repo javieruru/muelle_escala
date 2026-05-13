@@ -198,8 +198,67 @@
     <div class="statusbar-r"><span>Al cargar el Excel se sincroniza automáticamente con el muelle</span></div>
   </footer>
 </div><!-- end app-shell -->
-<div class="toast" id="tst"></div>
-<div class="tip" id="tip"></div>
+
+<!-- Tweaks panel igual que el muelle -->
+<div style="position:fixed;bottom:28px;right:0;width:272px;z-index:2000">
+  <div class="side-tweaks-anchor" style="position:relative">
+    <div class="twk-panel" id="twkPanel">
+      <div class="twk-hd" id="twkHd">
+        <b>⚙ Tweaks</b>
+        <span class="twk-hd-arrow" id="twkArrow">▲</span>
+      </div>
+      <div class="twk-body collapsed" id="twkBody">
+        <div class="twk-section">Estética</div>
+        <div class="twk-row">
+          <span class="twk-label">Tema</span>
+          <select class="twk-select" id="twkTheme">
+            <option value="console">Console — dark</option>
+            <option value="carta">Carta Náutica</option>
+            <option value="schematic">Schematic — CAD</option>
+          </select>
+        </div>
+        <div class="twk-row">
+          <span class="twk-label">Densidad</span>
+          <div class="twk-segs">
+            <button class="twk-seg" id="twkCompact">Compact</button>
+            <button class="twk-seg on" id="twkCozy">Normal</button>
+            <button class="twk-seg" id="twkComfy">Amplia</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initTweaks(){
+  const hd=document.getElementById('twkHd'),
+        body=document.getElementById('twkBody'),
+        arrow=document.getElementById('twkArrow');
+  let open=false;
+  hd.addEventListener('click',()=>{
+    open=!open;
+    body.classList.toggle('collapsed',!open);
+    arrow.textContent=open?'▼':'▲';
+  });
+  function applyAll(){
+    const theme=document.getElementById('twkTheme').value;
+    const density=['compact','cozy','comfortable'].find(v=>
+      document.getElementById('twk'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.contains('on')
+    )||'cozy';
+    document.body.dataset.theme=theme;
+    document.body.dataset.density=density;
+  }
+  document.getElementById('twkTheme').addEventListener('change',applyAll);
+  ['twkCompact','twkCozy','twkComfy'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('click',()=>{
+      ['twkCompact','twkCozy','twkComfy'].forEach(x=>document.getElementById(x)?.classList.remove('on'));
+      document.getElementById(id).classList.add('on');
+      applyAll();
+    });
+  });
+})();
+</script>
 <script src="schedule.js"></script>
 <script type="module" src="firebase.js"></script>
 </body>
