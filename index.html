@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DockSim — Muelle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="console" data-realistic="false" data-density="cozy" data-show-ruler="true">
+
+
+<div class="app-shell">
+  <!-- ============= TOP BAR ============= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">DS</div>
+      <div class="brand-text">
+        <div class="brand-name">DockSim</div>
+        <div class="brand-sub">Muelle Escala · Atraque</div>
+      </div>
+    </div>
+
+    
+    <nav class="tab-nav">
+      <a href="index.html" class="tab-btn active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Muelle
+      </a>
+      <a href="schedule.html" class="tab-btn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Schedule
+      </a>
+    </nav>
+
+    <div class="tb-center" id="tbStats">
+      <div class="tb-stat"><span class="tb-dot"></span><b id="tbBuquesN">0</b> buques en muelle</div>
+      <div class="tb-sep"></div>
+      <div class="tb-stat"><b id="tbMetrosN">0 m</b> ocupados de 616 m</div>
+    </div>
+
+    <div class="tb-actions">
+      <!-- Sesiones -->
+      <button class="icon-btn" id="btnSesiones" title="Sesiones guardadas">📋</button>
+      <!-- Guardar sesión -->
+      <button class="icon-btn" id="btnGuardarSesion" title="Guardar sesión">
+        <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4"/><rect x="8" y="13" width="8" height="6"/></svg>
+      </button>
+      <!-- Config impresión -->
+      <button class="icon-btn" id="btnConfig" title="Configuración de impresión">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <!-- Imprimir -->
+      <button class="icon-btn" id="btnImprimir" title="Imprimir / PDF">
+        <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M7 14h10v6H7z"/></svg>
+      </button>
+      <!-- Nuevo buque -->
+      <button class="tb-primary" id="btnAgregarBuque">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Nuevo buque
+      </button>
+    </div>
+  </header>
+
+  <!-- ============= MAIN ============= -->
+  <main class="main">
+    <div class="canvas-wrap" id="canvasWrap">
+
+      <!-- Hint ctrl+clic -->
+      <div class="wind" id="hintWind" style="font-size:10px;gap:6px;padding:6px 10px">
+        <span style="opacity:.6">⚓</span>
+        <span style="color:var(--text-2)"><kbd style="background:var(--panel-2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:9px">Ctrl</kbd> + clic en buque = punto de amarre</span>
+      </div>
+
+
+      <!-- Zona principal: SVG cabos + buques + muelle -->
+      <div class="zona-principal" id="zonaPrincipal">
+        <svg class="svg-cabos" id="svgCabos" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="water-layer"></div>
+        <div class="zona-buques" id="zonaBuques"></div>
+        <div class="muelle" id="muelle">
+          <div class="muelle-agua-top"></div>
+          <div class="muelle-superficie">
+            <div class="bitas-contenedor" id="bitasContenedor"></div>
+            <!-- División Muelle Nuevo / Viejo -->
+            <div class="muelle-division"></div>
+            <div class="muelle-zona-label muelle-zona-nuevo">MUELLE NUEVO · 350 m</div>
+            <div class="muelle-zona-label muelle-zona-viejo">MUELLE VIEJO · 266 m</div>
+
+
+            <div class="muelle-label-izq">◀ 212 — 201</div>
+            <div class="muelle-label-der">201 — 10 ▶</div>
+            <button class="btn-info-bitas" id="btnInfoBitas">?</button>
+            <div class="ruler" id="ruler"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============= RIGHT PANEL ============= -->
+    <aside class="side">
+      <div class="side-head">
+        <div class="side-title">Buques en muelle</div>
+        <div class="side-count" id="sideCount">00</div>
+      </div>
+      <div class="side-search">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Filtrar por nombre, banda, bita…" id="searchInput" />
+        </div>
+      </div>
+      <div class="ship-list" id="shipList"></div>
+
+      <!-- Tweaks panel anclado aquí, se abre hacia arriba -->
+      <div class="side-tweaks-anchor" style="position:relative">
+        <div class="twk-panel" id="twkPanel">
+          <div class="twk-hd" id="twkHd">
+            <b>⚙ Tweaks</b>
+            <span class="twk-hd-arrow" id="twkArrow">▲</span>
+          </div>
+          <div class="twk-body collapsed" id="twkBody">
+            <div class="twk-section">Estética</div>
+            <div class="twk-row">
+              <span class="twk-label">Tema</span>
+              <select class="twk-select" id="twkTheme">
+                <option value="console">Console — dark</option>
+                <option value="carta">Carta Náutica</option>
+                <option value="schematic">Schematic — CAD</option>
+              </select>
+            </div>
+            <div class="twk-row">
+              <span class="twk-label">Buques</span>
+              <div class="twk-segs">
+                <button class="twk-seg on" data-val="false" id="twkFlat">Plano</button>
+                <button class="twk-seg" data-val="true" id="twkReal">Realista</button>
+              </div>
+            </div>
+            <div class="twk-row">
+              <span class="twk-label">Densidad</span>
+              <div class="twk-segs">
+                <button class="twk-seg" data-val="compact" id="twkCompact">Compact</button>
+                <button class="twk-seg on" data-val="cozy" id="twkCozy">Normal</button>
+                <button class="twk-seg" data-val="comfortable" id="twkComfy">Amplia</button>
+              </div>
+            </div>
+            <div class="twk-section" style="margin-top:8px">Elementos</div>
+
+            <div class="twk-row">
+              <span class="twk-label">Regla</span>
+              <button class="twk-toggle on" id="twkRuler"></button>
+            </div>
+            <div class="twk-row">
+              <span class="twk-label">Tabla buques</span>
+              <button class="twk-toggle on" id="twkTabla"></button>
+            </div>
+            <div class="twk-row">
+              <span class="twk-label">Hint Ctrl+clic</span>
+              <button class="twk-toggle on" id="twkHint"></button>
+            </div>
+            <div class="twk-section" style="margin-top:8px">Muelle</div>
+            <div class="twk-row">
+              <span class="twk-label">Sep. borde</span>
+              <div class="twk-slider-wrap">
+                <input class="twk-slider" type="range" id="twkSepBorde" min="0" max="100" step="1" value="4">
+                <span class="twk-slider-val" id="twkSepBordeVal">4 m</span>
+              </div>
+            </div>
+            <div class="twk-row">
+              <span class="twk-label">Sep. buques</span>
+              <div class="twk-slider-wrap">
+                <input class="twk-slider" type="range" id="twkSepBuques" min="0" max="100" step="1" value="15">
+                <span class="twk-slider-val" id="twkSepBuquesVal">15 m</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-stats">
+        <div class="stat-cell">
+          <div class="stat-label">Ocupación</div>
+          <div class="stat-value" id="statOcupPct">0<span style="font-size:14px;color:var(--text-3)">%</span></div>
+          <div class="stat-sub" id="statOcupM">0 / 616 m</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Cabos</div>
+          <div class="stat-value" id="statCabosN">0</div>
+          <div class="stat-sub" id="statCabosBitas">en 0 bitas</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ============= STATUS BAR ============= -->
+  <footer class="statusbar">
+    <div class="statusbar-l">
+      <span id="statusSession"><b>Sin sesión activa</b></span>
+    </div>
+    <div class="statusbar-r">
+      <span><kbd>Ctrl</kbd> + clic = amarrar</span>
+      <span><kbd>2×clic</kbd> = editar</span>
+      <span><kbd>R</kbd> = realista</span>
+      <span><kbd>T</kbd> = tema</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============= PANEL INFO FLOTANTE ============= -->
+<div class="panel-info-flotante" id="panelInfoFlotante">
+  <div class="pif-header tt-head">
+    <span class="pif-icon" id="pifIcon">🚢</span>
+    <span class="pif-titulo" id="pifTitulo">—</span>
+  </div>
+  <div class="pif-body tt-body" id="pifBody"></div>
+</div>
+
+<!-- ============= PANEL FLOTANTE TABLA BUQUES ============= -->
+<div class="panel-flotante" id="panelFlotante">
+  <div class="panel-header">
+    <span class="panel-title">🚢 Buques en muelle</span>
+    <button class="panel-toggle" id="panelToggle">▼</button>
+  </div>
+  <div class="panel-body" id="panelBody">
+    <table class="tabla-buques" id="tablaBuques" style="display:none">
+      <thead>
+        <tr><th></th><th>Nombre</th><th>Banda</th><th>Eslora</th><th>Manga</th><th>Moves</th><th>Bitas</th><th>🔒</th><th>⚓</th></tr>
+      </thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+    <div class="panel-empty" id="panelEmpty">Sin buques en muelle</div>
+  </div>
+</div>
+
+<!-- ============= PANEL INFO BITAS (modal) ============= -->
+<div class="overlay-info" id="overlayInfo"></div>
+<div class="panel-info-bitas" id="panelInfoBitas">
+  <div class="panel-info-header">
+    <span class="panel-info-title">📋 Bitas — Muelle Escala</span>
+    <button class="panel-info-close" id="closeInfoBitas">✕</button>
+  </div>
+  <div class="panel-info-leyenda">
+    <span class="leyenda-item leyenda-250"><span class="leyenda-dot"></span>250 t · Reforzada</span>
+    <span class="leyenda-item leyenda-150"><span class="leyenda-dot"></span>150 t · Estándar</span>
+    <span class="leyenda-item leyenda-55"><span class="leyenda-dot"></span>55 t · Liviana</span>
+  </div>
+  <div class="panel-info-body">
+    <table class="tabla-info-bitas">
+      <thead><tr><th>Bita</th><th>Pos. (m)</th><th>Dist. sig. (m)</th><th>Capacidad</th></tr></thead>
+      <tbody id="tablaInfoBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============= MODAL AGREGAR ============= -->
+<div class="overlay" id="overlayAgregar"></div>
+<div class="modal" id="modalAgregar">
+  <div class="modal-header">
+    <h2 class="modal-title">Nuevo Buque</h2>
+    <button class="modal-close" id="closeAgregar">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="field-group">
+      <label class="field-label">Nombre</label>
+      <input class="field-input" type="text" id="inp-nombre" placeholder="CAP SAN LAZARO" autocomplete="off" style="text-transform:uppercase" />
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label">Eslora (m)</label>
+        <input class="field-input" type="number" id="inp-metros" placeholder="300" min="70" max="400" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Manga (m)</label>
+        <input class="field-input" type="number" id="inp-manga" placeholder="35" min="8" max="70" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Moves</label>
+      <input class="field-input" type="number" id="inp-moves" placeholder="0" min="0" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Banda</label>
+      <div class="field-segmented" id="seg-banda">
+        <button class="seg-btn active" data-val="estribor">Estribor</button>
+        <button class="seg-btn" data-val="babor">Babor</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Color</label>
+      <div class="color-row">
+        <input class="field-color" type="color" id="inp-color" />
+        <button class="btn-random-color" id="btnRandomColor">🎲 Aleatorio</button>
+        <div class="color-swatches" id="colorSwatches"></div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notas</label>
+      <input class="field-input" type="text" id="inp-notas" placeholder="Observaciones, instrucciones..." autocomplete="off" />
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" id="cancelAgregar">Cancelar</button>
+    <button class="btn-confirm" id="confirmAgregar">Colocar Buque</button>
+  </div>
+</div>
+<div class="overlay" id="overlayEditar"></div>
+<div class="modal" id="modalEditar">
+  <div class="modal-header">
+    <h2 class="modal-title">Editar Buque</h2>
+    <button class="modal-close" id="closeEditar">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="field-group">
+      <label class="field-label">Nombre</label>
+      <input class="field-input" type="text" id="edit-nombre" autocomplete="off" style="text-transform:uppercase" />
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label">Eslora (m)</label>
+        <input class="field-input" type="number" id="edit-metros" min="70" max="400" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Manga (m)</label>
+        <input class="field-input" type="number" id="edit-manga" min="8" max="70" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Moves</label>
+      <input class="field-input" type="number" id="edit-moves" placeholder="0" min="0" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Banda</label>
+      <div class="field-segmented" id="seg-edit-banda">
+        <button class="seg-btn active" data-val="estribor">Estribor</button>
+        <button class="seg-btn" data-val="babor">Babor</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Color</label>
+      <div class="color-row">
+        <input class="field-color" type="color" id="edit-color" />
+        <button class="btn-random-color" id="editBtnRandom">🎲 Aleatorio</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notas</label>
+      <input class="field-input" type="text" id="edit-notas" placeholder="Observaciones, instrucciones..." autocomplete="off" />
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-danger" id="eliminarBuque">Eliminar</button>
+    <button class="btn-cancel" id="cancelEditar">Cancelar</button>
+    <button class="btn-confirm" id="confirmEditar">Guardar</button>
+  </div>
+</div>
+
+<!-- ============= MODAL CONFIRMACIÓN CAMBIO DE BANDA ============= -->
+<div class="overlay" id="overlayConfirmBanda"></div>
+<div class="modal" id="modalConfirmBanda">
+  <div class="modal-header">
+    <h2 class="modal-title">⚠️ Cambio de banda</h2>
+  </div>
+  <div class="modal-body">
+    <p class="field-label" style="font-size:13px;letter-spacing:0;text-transform:none;color:var(--text);line-height:1.6" id="confirmBandaMsg"></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" id="confirmBandaNo">Cancelar</button>
+    <button class="btn-danger" style="margin-right:0" id="confirmBandaSi">Eliminar cabos y cambiar banda</button>
+  </div>
+</div>
+
+<!-- ============= MODAL CONFIG IMPRESIÓN ============= -->
+<div class="overlay" id="overlayConfig"></div>
+<div class="modal" id="modalConfig">
+  <div class="modal-header">
+    <h2 class="modal-title">⚙️ Configuración de impresión</h2>
+    <button class="modal-close" id="closeConfig">✕</button>
+  </div>
+  <div class="modal-body">
+    <p class="config-section-title">Columnas visibles en la tabla</p>
+    <div class="config-toggles">
+      <label class="toggle-row"><span class="toggle-label">Banda</span><input type="checkbox" class="print-col-toggle" data-col="banda" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Eslora</span><input type="checkbox" class="print-col-toggle" data-col="eslora" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Manga</span><input type="checkbox" class="print-col-toggle" data-col="manga" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Moves</span><input type="checkbox" class="print-col-toggle" data-col="moves" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Bitas</span><input type="checkbox" class="print-col-toggle" data-col="bitas" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Cabos amarrados</span><input type="checkbox" class="print-col-toggle" data-col="cabos" checked /></label>
+    </div>
+    <p class="config-section-title" style="margin-top:18px">Elementos del diagrama</p>
+    <div class="config-toggles">
+      <label class="toggle-row"><span class="toggle-label">Mostrar cabos en diagrama</span><input type="checkbox" class="print-col-toggle" data-col="diag-cabos" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Mostrar bitas</span><input type="checkbox" class="print-col-toggle" data-col="diag-bitas" checked /></label>
+      <label class="toggle-row"><span class="toggle-label">Mostrar regla de metros</span><input type="checkbox" class="print-col-toggle" data-col="diag-regla" checked /></label>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-confirm" id="closeConfigOk">Listo</button>
+  </div>
+</div>
+
+<!-- ============= MODAL GUARDAR SESIÓN ============= -->
+<div class="overlay" id="overlayGuardarSesion"></div>
+<div class="modal" id="modalGuardarSesion">
+  <div class="modal-header">
+    <h2 class="modal-title">💾 Guardar sesión</h2>
+    <button class="modal-close" id="closeGuardarSesion">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="field-group">
+      <label class="field-label">Nombre de la sesión</label>
+      <input class="field-input" type="text" id="inp-nombre-sesion" placeholder="Ej: Mañana 08/05 — UNISPIRIT" autocomplete="off" />
+    </div>
+    <p class="sesion-hint">Se guardará en la nube con un ID único. Podrás compartirla por link.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" id="cancelGuardarSesion">Cancelar</button>
+    <button class="btn-confirm" id="confirmGuardarSesion">Guardar</button>
+  </div>
+</div>
+
+<!-- ============= MODAL LINK SESIÓN ============= -->
+<div class="overlay" id="overlayLinkSesion"></div>
+<div class="modal" id="modalLinkSesion">
+  <div class="modal-header">
+    <h2 class="modal-title">🔗 Sesión guardada</h2>
+    <button class="modal-close" id="closeLinkSesion">✕</button>
+  </div>
+  <div class="modal-body">
+    <p class="sesion-hint" style="margin-bottom:10px">Copiá este link para compartir la sesión:</p>
+    <div class="link-box">
+      <span class="link-text" id="linkSesionText"></span>
+      <button class="btn-copy" id="btnCopyLink">Copiar</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-confirm" id="closeLinkSesionOk">Listo</button>
+  </div>
+</div>
+
+<!-- ============= MODAL LISTAR SESIONES ============= -->
+<div class="overlay" id="overlaySesiones"></div>
+<div class="modal modal-wide" id="modalSesiones">
+  <div class="modal-header">
+    <h2 class="modal-title">📋 Sesiones guardadas</h2>
+    <button class="modal-close" id="closeSesiones">✕</button>
+  </div>
+  <div class="modal-body" style="padding-bottom:8px">
+    <div class="sesion-filtros">
+      <input class="field-input" type="search" id="sesion-buscar-nombre" placeholder="🔍 Buscar por nombre o buque..." autocomplete="off" />
+      <div class="sesion-fecha-wrap">
+        <input class="field-input" type="date" id="sesion-buscar-fecha" />
+        <button class="btn-limpiar-fecha" id="sesion-limpiar-fecha" title="Limpiar fecha">✕</button>
+      </div>
+    </div>
+  </div>
+  <div class="sesiones-lista" id="sesionesLista">
+    <div class="sesiones-loading">Cargando sesiones...</div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" id="cancelSesiones">Cerrar</button>
+  </div>
+</div>
+
+<!-- ============= TOAST ============= -->
+<div class="toast" id="toast"></div>
+
+<!-- ============= ZONA DE IMPRESIÓN ============= -->
+<div id="printZone">
+  <div class="pz-header">
+    <div class="pz-brand-block">
+      <div class="pz-brand-mark">DS</div>
+      <div>
+        <div class="pz-brand-name">DockSim</div>
+        <div class="pz-brand-sub">Muelle Escala · Atraque</div>
+      </div>
+    </div>
+    <div class="pz-meta">
+      <div class="pz-fecha" id="pzFecha"></div>
+      <div class="pz-stats" id="pzStats"></div>
+    </div>
+  </div>
+  <div class="pz-canvas-wrap"><canvas id="printCanvas"></canvas></div>
+  <div class="pz-tabla-wrap">
+    <div class="pz-tabla-titulo">Estado del Muelle al momento de impresión</div>
+    <table class="pz-tabla" id="pzTabla">
+      <thead><tr><th>#</th><th>Nombre</th><th>Banda</th><th>Eslora</th><th>Manga</th><th>Moves</th><th>Bitas</th><th>Cabos amarrados</th></tr></thead>
+      <tbody id="pzTablaBody"></tbody>
+    </table>
+  </div>
+  <div class="pz-footer">DockSim · Muelle Escala · Impreso el <span id="pzFechaFooter"></span></div>
+</div>
+
+<!-- ================================================================
+     SCRIPT PRINCIPAL (lógica script.js adaptada al nuevo DOM)
+================================================================ -->
+
+
+
+
+
+<!-- Firebase (módulo ES externo — igual que en index.html) -->
+
+
+
+<script src="app.js"></script>
+<script type="module" src="firebase.js"></script>
+</body>
+</html>
