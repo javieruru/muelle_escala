@@ -62,7 +62,8 @@ function areaH(){
 }
 
 /* ─── IMPORTAR ─── */
-$('bImp').addEventListener('click',()=>$('fExcel').click());
+// El label#bImp ya wrappea el input, el click es automático.
+// Por si hay referencias externas, también escuchamos directamente el input:
 $('fExcel').addEventListener('change',e=>{ const f=e.target.files?.[0]; if(f){leerExcel(f);e.target.value='';} });
 
 function leerExcel(file){
@@ -942,7 +943,7 @@ $('bNow').addEventListener('click',()=>{
 $('bSemA').addEventListener('click',()=>{ const ss=[...new Set(buques.map(b=>b.sem))].sort((a,b)=>a-b); const i=ss.indexOf(semana); if(i>0){semana=ss[i-1];render();} });
 $('bSemS').addEventListener('click',()=>{ const ss=[...new Set(buques.map(b=>b.sem))].sort((a,b)=>a-b); const i=ss.indexOf(semana); if(i<ss.length-1){semana=ss[i+1];render();} });
 
-$('bSav').addEventListener('click',()=>{
+$('bSav')?.addEventListener('click',()=>{
   const snap={semana,fecha:new Date().toISOString(),buques:semAct().map(b=>({...b,eta:b.eta?.toISOString(),etb:b.etb?.toISOString(),ets:b.ets?.toISOString()})),mPos};
   localStorage.setItem(`sched_sem${semana}`,JSON.stringify(snap));
   toast('💾 Guardado — sem. '+semana);
